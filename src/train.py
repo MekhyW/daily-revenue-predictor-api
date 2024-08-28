@@ -1,5 +1,4 @@
 import pandas as pd
-import pickle
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.model_selection import train_test_split
 from sklearn.compose import make_column_transformer
@@ -27,6 +26,4 @@ def train_model(df):
         ('model', RandomForestRegressor(n_estimators=100, random_state=195))
     ])
     pipeline.fit(X_train, y_train)
-    with open("models/pipeline.pkl", "wb") as f:
-        pickle.dump(pipeline, f)
     return pipeline

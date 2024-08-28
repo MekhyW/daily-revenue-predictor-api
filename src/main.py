@@ -4,6 +4,7 @@ from pydantic import BaseModel
 import sqlite3
 import predict
 import train
+import model
 from sqlalchemy import create_engine
 from dotenv import load_dotenv
 import os
@@ -14,8 +15,12 @@ DB_PASSWORD = os.getenv("DB_PASSWORD")
 DB_HOST = os.getenv("DB_HOST")
 DB_PORT = os.getenv("DB_PORT")
 DB_DATABASE = os.getenv("DB_DATABASE")
+AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID")
+AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY")
+AWS_BUCKET_NAME = os.getenv("AWS_BUCKET_NAME")
 connection_string = f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_DATABASE}"
 engine = create_engine(connection_string)
+s3 = model.setup_s3(AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY)
 
 class Revenue(BaseModel):
     store_id: int
@@ -69,6 +74,7 @@ async def train(user: dict = Depends(validate_token)):
     """
     train_data = train.select_data_training(engine)
     pipeline = train.train_model(train_data)
+    model.save_model(s3, pipeline, AWS_BUCKET_NAME, "pipeline.pkl")
     return {"message": "Model trained successfully!"}
 
 @app.post("/predict")
@@ -76,6 +82,7 @@ async def predict(revenue: Revenue, user: dict = Depends(validate_token)):
     """
     Route to make predictions!
     """
+    pipeline = model.load_model(s3, AWS_BUCKET_NAME, "pipeline.pkl")
     predict.init_predict_table(engine)
-    predict.predict(engine, revenue.dict())
+    predict.predict(engine, revenue.dict(), pipeline)
     return {"message": "Predictions made successfully!"}

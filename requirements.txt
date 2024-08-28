@@ -3,3 +3,5 @@ scikit-learn
 psycopg2-binary
 SQLAlchemy
 python-dotenv
+fastapi
+boto3

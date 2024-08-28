@@ -8,8 +8,7 @@ def init_predict_table(engine):
             connection.execute(sql_script)
     print("Table sales_analytics.scoring_ml_felipec13 created!")
 
-def predict(engine, data_path):
-    pipeline = model.load_model('models/pipeline.pkl')
+def predict(engine, data_path, pipeline):
     df = pd.read_parquet(data_path)
     df["total_sales"] = pipeline.predict(df)
     with engine.connect() as connection:
