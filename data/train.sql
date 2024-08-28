@@ -1,0 +1,9 @@
+SELECT
+    store_id,
+    total_sales,
+    year,
+    month,
+    day,
+    weekday
+FROM 
+    sales_analytics.view_abt_train_felipec13;
